@@ -75,3 +75,10 @@ createOrder:
     - httpApi:
         path: /orders
         method: post
+sendOrderConfirmationEmailToBuyer:
+  handler: src/functions/orders.sendOrderConfirmationEmailToBuyer
+  events:
+    - sqs:
+        arn: !GetAtt TargetSQSQueue.Arn
+        batchSize: 10
+        functionResponseType: "ReportBatchItemFailures"

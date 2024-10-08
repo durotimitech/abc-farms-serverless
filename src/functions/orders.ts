@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult, SQSEvent } from "aws-lambda";
 import { createOrderSchema } from "../utilities/validators/orders";
 import { ErrorResponseHandler, ResponseHandler, StatusCodes } from "../utilities/ResponseHandler";
 import { ICreateOrder } from "../types/orders";
@@ -55,7 +55,9 @@ export const createOrder = async (event: APIGatewayProxyEvent): Promise<APIGatew
           throw new BadRequestError(createOrder.errMessage as string);
         }
 
-        logger.info(`'createOrder': order created for product with id ${productId} and order id ${createOrder.data.id}`);
+        logger.info(
+          `'createOrder': order created for product with id ${productId} and order id ${createOrder.data.id}`,
+        );
 
         logger.info(`'createOrder': sending event to EventBridge to notify order created`);
 
@@ -80,4 +82,26 @@ export const createOrder = async (event: APIGatewayProxyEvent): Promise<APIGatew
   } catch (e: any) {
     return ErrorResponseHandler(e);
   }
+};
+
+export const sendOrderConfirmationEmailToBuyer = async (event: SQSEvent) => {
+  logger.info("'sendOrderConfirmationEmailToBuyer': event called");
+
+  const records = event.Records;
+  let batchItemFailures = [];
+
+  if (records.length) {
+    for (const record of records) {
+      try {
+        const { id } = JSON.parse(record.body).detail;
+        logger.info(`'sendOrderConfirmationEmailToBuyer': email sent with order id ${id}`);
+      } catch (e: any) {
+        batchItemFailures.push({
+          itemIdentifier: record.messageId,
+        });
+      }
+    }
+  }
+
+  return { batchItemFailures };
 };

@@ -35,6 +35,14 @@ TargetSQSQueue:
   Type: AWS::SQS::Queue
   Properties:
     QueueName: ORDER_CREATED_QUEUE-${self:provider.stage}
+    RedrivePolicy:
+      deadLetterTargetArn: !GetAtt TargetDLQueue.Arn
+      maxReceiveCount: 3 # Number of times a message can be received before being moved to the DLQ
+
+TargetDLQueue:
+  Type: AWS::SQS::Queue
+  Properties:
+    QueueName: ORDER_CREATED_DLQ-${self:provider.stage}
 
 TargetSQSRule:
   Type: AWS::Events::Rule

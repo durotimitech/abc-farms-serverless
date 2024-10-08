@@ -107,6 +107,12 @@
         "LogGroupName": "/aws/lambda/abc-farms-api-dev-createOrder"
       }
     },
+    "SendOrderConfirmationEmailToBuyerLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/abc-farms-api-dev-sendOrderConfirmationEmailToBuyer"
+      }
+    },
     "IamRoleLambdaExecution": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -164,6 +170,22 @@
                       "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/abc-farms-api-dev*:*:*"
                     }
                   ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:ReceiveMessage",
+                    "sqs:DeleteMessage",
+                    "sqs:GetQueueAttributes"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "TargetSQSQueue",
+                        "Arn"
+                      ]
+                    }
+                  ]
                 }
               ]
             }
@@ -192,7 +214,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/abc-farms-api/dev/1728385039659-2024-10-08T10:57:19.659Z/abc-farms-api.zip"
+          "S3Key": "serverless/abc-farms-api/dev/1728408911668-2024-10-08T17:35:11.668Z/abc-farms-api.zip"
         },
         "Handler": "src/functions/products.addProduct",
         "Runtime": "nodejs16.x",
@@ -232,7 +254,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/abc-farms-api/dev/1728385039659-2024-10-08T10:57:19.659Z/abc-farms-api.zip"
+          "S3Key": "serverless/abc-farms-api/dev/1728408911668-2024-10-08T17:35:11.668Z/abc-farms-api.zip"
         },
         "Handler": "src/functions/products.getProducts",
         "Runtime": "nodejs16.x",
@@ -272,7 +294,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/abc-farms-api/dev/1728385039659-2024-10-08T10:57:19.659Z/abc-farms-api.zip"
+          "S3Key": "serverless/abc-farms-api/dev/1728408911668-2024-10-08T17:35:11.668Z/abc-farms-api.zip"
         },
         "Handler": "src/functions/products.getProduct",
         "Runtime": "nodejs16.x",
@@ -312,7 +334,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/abc-farms-api/dev/1728385039659-2024-10-08T10:57:19.659Z/abc-farms-api.zip"
+          "S3Key": "serverless/abc-farms-api/dev/1728408911668-2024-10-08T17:35:11.668Z/abc-farms-api.zip"
         },
         "Handler": "src/functions/products.updateProduct",
         "Runtime": "nodejs16.x",
@@ -352,7 +374,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/abc-farms-api/dev/1728385039659-2024-10-08T10:57:19.659Z/abc-farms-api.zip"
+          "S3Key": "serverless/abc-farms-api/dev/1728408911668-2024-10-08T17:35:11.668Z/abc-farms-api.zip"
         },
         "Handler": "src/functions/products.deleteProduct",
         "Runtime": "nodejs16.x",
@@ -392,7 +414,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/abc-farms-api/dev/1728385039659-2024-10-08T10:57:19.659Z/abc-farms-api.zip"
+          "S3Key": "serverless/abc-farms-api/dev/1728408911668-2024-10-08T17:35:11.668Z/abc-farms-api.zip"
         },
         "Handler": "src/functions/orders.createOrder",
         "Runtime": "nodejs16.x",
@@ -425,64 +447,138 @@
         "CreateOrderLogGroup"
       ]
     },
-    "AddProductLambdaVersion7HkXfdMRHrJm2dXjlFBfIuV5rfPKRuVJPt28np6e8rQ": {
+    "SendOrderConfirmationEmailToBuyerLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/abc-farms-api/dev/1728408911668-2024-10-08T17:35:11.668Z/abc-farms-api.zip"
+        },
+        "Handler": "src/functions/orders.sendOrderConfirmationEmailToBuyer",
+        "Runtime": "nodejs16.x",
+        "FunctionName": "abc-farms-api-dev-sendOrderConfirmationEmailToBuyer",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+            "EVENT_BUS_NAME": {
+              "Ref": "EventBus"
+            },
+            "PRODUCTS_TABLE_NAME": {
+              "Ref": "productsTable"
+            },
+            "ORDERS_TABLE_NAME": {
+              "Ref": "ordersTable"
+            }
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "SendOrderConfirmationEmailToBuyerLogGroup"
+      ]
+    },
+    "AddProductLambdaVersionFJBtuqddbigoaGDZ1kObLBZhAVFwxGPlCeJWREQTk": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "AddProductLambdaFunction"
         },
-        "CodeSha256": "pUnz/Po9rvrC+Sz+TsQglpF1TJhKgcqBn2jfNJVz3WQ="
+        "CodeSha256": "+6CohVrrwAT7xzOdx3ilkqgOVi6saLT6VuCNSO7smRU="
       }
     },
-    "GetProductsLambdaVersiond0RLX8uES8mRs9nabolRGwefcoGin5qySvutpMCBxs": {
+    "GetProductsLambdaVersion8i2NFnCYwszQgenTFuHwwe5ykwRLXB36K5iXOhCF4": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetProductsLambdaFunction"
         },
-        "CodeSha256": "pUnz/Po9rvrC+Sz+TsQglpF1TJhKgcqBn2jfNJVz3WQ="
+        "CodeSha256": "+6CohVrrwAT7xzOdx3ilkqgOVi6saLT6VuCNSO7smRU="
       }
     },
-    "GetProductLambdaVersionhW2gciLFaOYBg8EM0LtfWYgQzdBuyDT2d4G04Sncs": {
+    "GetProductLambdaVersionvBo3lo4cEJ9A38o1BMXiLtnkCBcNZ8FlVhZfFwZw": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetProductLambdaFunction"
         },
-        "CodeSha256": "pUnz/Po9rvrC+Sz+TsQglpF1TJhKgcqBn2jfNJVz3WQ="
+        "CodeSha256": "+6CohVrrwAT7xzOdx3ilkqgOVi6saLT6VuCNSO7smRU="
       }
     },
-    "UpdateProductLambdaVersionRGBq3aEWfa3pdTIfHllv4ZldhrppmiP5eiLMhPua6M": {
+    "UpdateProductLambdaVersion1uTbWMZScgN9c5tufmzN0yVmI6JZAz08id4eDgqvym4": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "UpdateProductLambdaFunction"
         },
-        "CodeSha256": "pUnz/Po9rvrC+Sz+TsQglpF1TJhKgcqBn2jfNJVz3WQ="
+        "CodeSha256": "+6CohVrrwAT7xzOdx3ilkqgOVi6saLT6VuCNSO7smRU="
       }
     },
-    "DeleteProductLambdaVersionaw0OFvfjRrZXllzv9GmCTjj5eC1d55311fD9feeZgY": {
+    "DeleteProductLambdaVersionjWkWGqIYJGUIGWVUcmYl8prsw0nhmdw2tOfGVkVhVw": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "DeleteProductLambdaFunction"
         },
-        "CodeSha256": "pUnz/Po9rvrC+Sz+TsQglpF1TJhKgcqBn2jfNJVz3WQ="
+        "CodeSha256": "+6CohVrrwAT7xzOdx3ilkqgOVi6saLT6VuCNSO7smRU="
       }
     },
-    "CreateOrderLambdaVersionkYTwLJIb32q6xtm5996KqF7PDdvkxIUYlr2zQc": {
+    "CreateOrderLambdaVersionD56H4ESmAsGkh9hBAPnGJsH2FKl8GumPHZwteMQw4": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "CreateOrderLambdaFunction"
         },
-        "CodeSha256": "pUnz/Po9rvrC+Sz+TsQglpF1TJhKgcqBn2jfNJVz3WQ="
+        "CodeSha256": "+6CohVrrwAT7xzOdx3ilkqgOVi6saLT6VuCNSO7smRU="
+      }
+    },
+    "SendOrderConfirmationEmailToBuyerLambdaVersion6qzsfdIqs0KXiWt6pTHTD3WDktFcgkoRnCGc6fVA8k": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "SendOrderConfirmationEmailToBuyerLambdaFunction"
+        },
+        "CodeSha256": "+6CohVrrwAT7xzOdx3ilkqgOVi6saLT6VuCNSO7smRU="
+      }
+    },
+    "SendOrderConfirmationEmailToBuyerEventSourceMappingSQSTargetSQSQueue": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "DependsOn": [
+        "IamRoleLambdaExecution"
+      ],
+      "Properties": {
+        "BatchSize": 10,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "TargetSQSQueue",
+            "Arn"
+          ]
+        },
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SendOrderConfirmationEmailToBuyerLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Enabled": true,
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures"
+        ]
       }
     },
     "HttpApi": {
@@ -1587,7 +1683,7 @@
     "AddProductLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "AddProductLambdaVersion7HkXfdMRHrJm2dXjlFBfIuV5rfPKRuVJPt28np6e8rQ"
+        "Ref": "AddProductLambdaVersionFJBtuqddbigoaGDZ1kObLBZhAVFwxGPlCeJWREQTk"
       },
       "Export": {
         "Name": "sls-abc-farms-api-dev-AddProductLambdaFunctionQualifiedArn"
@@ -1596,7 +1692,7 @@
     "GetProductsLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetProductsLambdaVersiond0RLX8uES8mRs9nabolRGwefcoGin5qySvutpMCBxs"
+        "Ref": "GetProductsLambdaVersion8i2NFnCYwszQgenTFuHwwe5ykwRLXB36K5iXOhCF4"
       },
       "Export": {
         "Name": "sls-abc-farms-api-dev-GetProductsLambdaFunctionQualifiedArn"
@@ -1605,7 +1701,7 @@
     "GetProductLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetProductLambdaVersionhW2gciLFaOYBg8EM0LtfWYgQzdBuyDT2d4G04Sncs"
+        "Ref": "GetProductLambdaVersionvBo3lo4cEJ9A38o1BMXiLtnkCBcNZ8FlVhZfFwZw"
       },
       "Export": {
         "Name": "sls-abc-farms-api-dev-GetProductLambdaFunctionQualifiedArn"
@@ -1614,7 +1710,7 @@
     "UpdateProductLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "UpdateProductLambdaVersionRGBq3aEWfa3pdTIfHllv4ZldhrppmiP5eiLMhPua6M"
+        "Ref": "UpdateProductLambdaVersion1uTbWMZScgN9c5tufmzN0yVmI6JZAz08id4eDgqvym4"
       },
       "Export": {
         "Name": "sls-abc-farms-api-dev-UpdateProductLambdaFunctionQualifiedArn"
@@ -1623,7 +1719,7 @@
     "DeleteProductLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "DeleteProductLambdaVersionaw0OFvfjRrZXllzv9GmCTjj5eC1d55311fD9feeZgY"
+        "Ref": "DeleteProductLambdaVersionjWkWGqIYJGUIGWVUcmYl8prsw0nhmdw2tOfGVkVhVw"
       },
       "Export": {
         "Name": "sls-abc-farms-api-dev-DeleteProductLambdaFunctionQualifiedArn"
@@ -1632,10 +1728,19 @@
     "CreateOrderLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "CreateOrderLambdaVersionkYTwLJIb32q6xtm5996KqF7PDdvkxIUYlr2zQc"
+        "Ref": "CreateOrderLambdaVersionD56H4ESmAsGkh9hBAPnGJsH2FKl8GumPHZwteMQw4"
       },
       "Export": {
         "Name": "sls-abc-farms-api-dev-CreateOrderLambdaFunctionQualifiedArn"
+      }
+    },
+    "SendOrderConfirmationEmailToBuyerLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "SendOrderConfirmationEmailToBuyerLambdaVersion6qzsfdIqs0KXiWt6pTHTD3WDktFcgkoRnCGc6fVA8k"
+      },
+      "Export": {
+        "Name": "sls-abc-farms-api-dev-SendOrderConfirmationEmailToBuyerLambdaFunctionQualifiedArn"
       }
     },
     "HttpApiId": {
