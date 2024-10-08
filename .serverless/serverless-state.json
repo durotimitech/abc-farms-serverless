@@ -114,6 +114,12 @@
               "LogGroupName": "/aws/lambda/abc-farms-api-dev-deleteProduct"
             }
           },
+          "CreateOrderLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/abc-farms-api-dev-createOrder"
+            }
+          },
           "IamRoleLambdaExecution": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -199,9 +205,9 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/abc-farms-api/dev/1728249685712-2024-10-06T21:21:25.712Z/abc-farms-api.zip"
+                "S3Key": "serverless/abc-farms-api/dev/1728362900640-2024-10-08T04:48:20.640Z/abc-farms-api.zip"
               },
-              "Handler": "src/services/products.addProduct",
+              "Handler": "src/functions/products.addProduct",
               "Runtime": "nodejs16.x",
               "FunctionName": "abc-farms-api-dev-addProduct",
               "MemorySize": 1024,
@@ -233,9 +239,9 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/abc-farms-api/dev/1728249685712-2024-10-06T21:21:25.712Z/abc-farms-api.zip"
+                "S3Key": "serverless/abc-farms-api/dev/1728362900640-2024-10-08T04:48:20.640Z/abc-farms-api.zip"
               },
-              "Handler": "src/services/products.getProducts",
+              "Handler": "src/functions/products.getProducts",
               "Runtime": "nodejs16.x",
               "FunctionName": "abc-farms-api-dev-getProducts",
               "MemorySize": 1024,
@@ -267,9 +273,9 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/abc-farms-api/dev/1728249685712-2024-10-06T21:21:25.712Z/abc-farms-api.zip"
+                "S3Key": "serverless/abc-farms-api/dev/1728362900640-2024-10-08T04:48:20.640Z/abc-farms-api.zip"
               },
-              "Handler": "src/services/products.getProduct",
+              "Handler": "src/functions/products.getProduct",
               "Runtime": "nodejs16.x",
               "FunctionName": "abc-farms-api-dev-getProduct",
               "MemorySize": 1024,
@@ -301,9 +307,9 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/abc-farms-api/dev/1728249685712-2024-10-06T21:21:25.712Z/abc-farms-api.zip"
+                "S3Key": "serverless/abc-farms-api/dev/1728362900640-2024-10-08T04:48:20.640Z/abc-farms-api.zip"
               },
-              "Handler": "src/services/products.updateProduct",
+              "Handler": "src/functions/products.updateProduct",
               "Runtime": "nodejs16.x",
               "FunctionName": "abc-farms-api-dev-updateProduct",
               "MemorySize": 1024,
@@ -335,9 +341,9 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/abc-farms-api/dev/1728249685712-2024-10-06T21:21:25.712Z/abc-farms-api.zip"
+                "S3Key": "serverless/abc-farms-api/dev/1728362900640-2024-10-08T04:48:20.640Z/abc-farms-api.zip"
               },
-              "Handler": "src/services/products.deleteProduct",
+              "Handler": "src/functions/products.deleteProduct",
               "Runtime": "nodejs16.x",
               "FunctionName": "abc-farms-api-dev-deleteProduct",
               "MemorySize": 1024,
@@ -362,54 +368,98 @@
               "DeleteProductLogGroup"
             ]
           },
-          "AddProductLambdaVersioneM8sDI6U0IrRWx9wYI2F9JznjR6U9pxvr3tQJ0z54w8": {
+          "CreateOrderLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/abc-farms-api/dev/1728362900640-2024-10-08T04:48:20.640Z/abc-farms-api.zip"
+              },
+              "Handler": "src/functions/orders.createOrder",
+              "Runtime": "nodejs16.x",
+              "FunctionName": "abc-farms-api-dev-createOrder",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "PRODUCTS_TABLE_NAME": {
+                    "Ref": "ordersTable"
+                  },
+                  "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "CreateOrderIamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CreateOrderIamRoleLambdaExecution",
+              "CreateOrderLogGroup"
+            ]
+          },
+          "AddProductLambdaVersion07zCwKyP91Pib9n2OeKnN5qIUcopc4T4YIZkvsr8c": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "AddProductLambdaFunction"
               },
-              "CodeSha256": "5SmTfO0albfUfTmed6xVgD2qoLkLTG8pC87U3q/ApDU="
+              "CodeSha256": "idup/r82oe4eP+OlQcdyYcUgw1Dgi9cNCbzsh5semx0="
             }
           },
-          "GetProductsLambdaVersionXC7saoEieq9PhI4u7oaDuPpnS4ZtIhWij09t0N6PWY": {
+          "GetProductsLambdaVersionhiJfMfbR9Tuo4UBhzR6py5VqCEb3TGokCdnn475PM3g": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GetProductsLambdaFunction"
               },
-              "CodeSha256": "5SmTfO0albfUfTmed6xVgD2qoLkLTG8pC87U3q/ApDU="
+              "CodeSha256": "idup/r82oe4eP+OlQcdyYcUgw1Dgi9cNCbzsh5semx0="
             }
           },
-          "GetProductLambdaVersionpbrWHjB6RdSWafYGvjZbOK4zvfPXdHoNfILCGU6YjMo": {
+          "GetProductLambdaVersionE9MPuFU4lFWntpdyDsEkP4gK1PCBsSBJFfy9h0OtpE": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GetProductLambdaFunction"
               },
-              "CodeSha256": "5SmTfO0albfUfTmed6xVgD2qoLkLTG8pC87U3q/ApDU="
+              "CodeSha256": "idup/r82oe4eP+OlQcdyYcUgw1Dgi9cNCbzsh5semx0="
             }
           },
-          "UpdateProductLambdaVersionifvNvjngkHRQX8OPIz8AS5BKda0XkQhOI5vjEn74": {
+          "UpdateProductLambdaVersionR0HVEOYP3YTWXHn81Ihyc9ojpQYZ7uVLVgEMFkNbM": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "UpdateProductLambdaFunction"
               },
-              "CodeSha256": "5SmTfO0albfUfTmed6xVgD2qoLkLTG8pC87U3q/ApDU="
+              "CodeSha256": "idup/r82oe4eP+OlQcdyYcUgw1Dgi9cNCbzsh5semx0="
             }
           },
-          "DeleteProductLambdaVersionvv1Zphta5x1WWgwAouZ466Q7j1nvGqysTtZfA9JlE": {
+          "DeleteProductLambdaVersionuRHeB2LjXCqRNMZDRnm3qUFQToZ5bTODUARH9GumNk": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "DeleteProductLambdaFunction"
               },
-              "CodeSha256": "5SmTfO0albfUfTmed6xVgD2qoLkLTG8pC87U3q/ApDU="
+              "CodeSha256": "idup/r82oe4eP+OlQcdyYcUgw1Dgi9cNCbzsh5semx0="
+            }
+          },
+          "CreateOrderLambdaVersionKQLQugwHRl0L5B2RH9kKuld58CSb8IvjcxXs6jWg": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateOrderLambdaFunction"
+              },
+              "CodeSha256": "idup/r82oe4eP+OlQcdyYcUgw1Dgi9cNCbzsh5semx0="
             }
           },
           "HttpApi": {
@@ -792,6 +842,78 @@
             },
             "DependsOn": "HttpApiIntegrationDeleteProduct"
           },
+          "CreateOrderLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CreateOrderLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationCreateOrder": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"CreateOrderLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostOrders": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "POST /orders",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationCreateOrder"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationCreateOrder"
+          },
           "AddProductIamRoleLambdaExecution": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -1004,7 +1126,7 @@
                       {
                         "Effect": "Allow",
                         "Action": [
-                          "dynamodb:Get Item"
+                          "dynamodb:GetItem"
                         ],
                         "Resource": {
                           "Fn::GetAtt": [
@@ -1197,10 +1319,110 @@
               "ManagedPolicyArns": []
             }
           },
+          "CreateOrderIamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "abc-farms-api",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/abc-farms-api-dev-createOrder:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "dynamodb:PutItem"
+                        ],
+                        "Resource": {
+                          "Fn::GetAtt": [
+                            "ordersTable",
+                            "Arn"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "abc-farms-api",
+                    "dev",
+                    "createOrder",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              },
+              "ManagedPolicyArns": []
+            }
+          },
           "productsTable": {
             "Type": "AWS::DynamoDB::Table",
             "Properties": {
               "TableName": "products-dev",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
+          },
+          "ordersTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "orders-dev",
               "BillingMode": "PAY_PER_REQUEST",
               "AttributeDefinitions": [
                 {
@@ -1229,7 +1451,7 @@
           "AddProductLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AddProductLambdaVersioneM8sDI6U0IrRWx9wYI2F9JznjR6U9pxvr3tQJ0z54w8"
+              "Ref": "AddProductLambdaVersion07zCwKyP91Pib9n2OeKnN5qIUcopc4T4YIZkvsr8c"
             },
             "Export": {
               "Name": "sls-abc-farms-api-dev-AddProductLambdaFunctionQualifiedArn"
@@ -1238,7 +1460,7 @@
           "GetProductsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetProductsLambdaVersionXC7saoEieq9PhI4u7oaDuPpnS4ZtIhWij09t0N6PWY"
+              "Ref": "GetProductsLambdaVersionhiJfMfbR9Tuo4UBhzR6py5VqCEb3TGokCdnn475PM3g"
             },
             "Export": {
               "Name": "sls-abc-farms-api-dev-GetProductsLambdaFunctionQualifiedArn"
@@ -1247,7 +1469,7 @@
           "GetProductLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetProductLambdaVersionpbrWHjB6RdSWafYGvjZbOK4zvfPXdHoNfILCGU6YjMo"
+              "Ref": "GetProductLambdaVersionE9MPuFU4lFWntpdyDsEkP4gK1PCBsSBJFfy9h0OtpE"
             },
             "Export": {
               "Name": "sls-abc-farms-api-dev-GetProductLambdaFunctionQualifiedArn"
@@ -1256,7 +1478,7 @@
           "UpdateProductLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "UpdateProductLambdaVersionifvNvjngkHRQX8OPIz8AS5BKda0XkQhOI5vjEn74"
+              "Ref": "UpdateProductLambdaVersionR0HVEOYP3YTWXHn81Ihyc9ojpQYZ7uVLVgEMFkNbM"
             },
             "Export": {
               "Name": "sls-abc-farms-api-dev-UpdateProductLambdaFunctionQualifiedArn"
@@ -1265,10 +1487,19 @@
           "DeleteProductLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "DeleteProductLambdaVersionvv1Zphta5x1WWgwAouZ466Q7j1nvGqysTtZfA9JlE"
+              "Ref": "DeleteProductLambdaVersionuRHeB2LjXCqRNMZDRnm3qUFQToZ5bTODUARH9GumNk"
             },
             "Export": {
               "Name": "sls-abc-farms-api-dev-DeleteProductLambdaFunctionQualifiedArn"
+            }
+          },
+          "CreateOrderLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateOrderLambdaVersionKQLQugwHRl0L5B2RH9kKuld58CSb8IvjcxXs6jWg"
+            },
+            "Export": {
+              "Name": "sls-abc-farms-api-dev-CreateOrderLambdaFunctionQualifiedArn"
             }
           },
           "HttpApiId": {
@@ -1398,7 +1629,7 @@
     "pluginsData": {},
     "functions": {
       "addProduct": {
-        "handler": "src/services/products.addProduct",
+        "handler": "src/functions/products.addProduct",
         "environment": {
           "PRODUCTS_TABLE_NAME": {
             "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"AddProductLambdaFunction\"][\"Properties\"][\"Environment\"][\"Variables\"][\"PRODUCTS_TABLE_NAME\"]"
@@ -1432,10 +1663,10 @@
         "timeout": 6,
         "runtime": "nodejs16.x",
         "vpc": {},
-        "versionLogicalId": "AddProductLambdaVersioneM8sDI6U0IrRWx9wYI2F9JznjR6U9pxvr3tQJ0z54w8"
+        "versionLogicalId": "AddProductLambdaVersion07zCwKyP91Pib9n2OeKnN5qIUcopc4T4YIZkvsr8c"
       },
       "getProducts": {
-        "handler": "src/services/products.getProducts",
+        "handler": "src/functions/products.getProducts",
         "environment": {
           "PRODUCTS_TABLE_NAME": {
             "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GetProductsLambdaFunction\"][\"Properties\"][\"Environment\"][\"Variables\"][\"PRODUCTS_TABLE_NAME\"]"
@@ -1469,10 +1700,10 @@
         "timeout": 6,
         "runtime": "nodejs16.x",
         "vpc": {},
-        "versionLogicalId": "GetProductsLambdaVersionXC7saoEieq9PhI4u7oaDuPpnS4ZtIhWij09t0N6PWY"
+        "versionLogicalId": "GetProductsLambdaVersionhiJfMfbR9Tuo4UBhzR6py5VqCEb3TGokCdnn475PM3g"
       },
       "getProduct": {
-        "handler": "src/services/products.getProduct",
+        "handler": "src/functions/products.getProduct",
         "environment": {
           "PRODUCTS_TABLE_NAME": {
             "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GetProductLambdaFunction\"][\"Properties\"][\"Environment\"][\"Variables\"][\"PRODUCTS_TABLE_NAME\"]"
@@ -1506,10 +1737,10 @@
         "timeout": 6,
         "runtime": "nodejs16.x",
         "vpc": {},
-        "versionLogicalId": "GetProductLambdaVersionpbrWHjB6RdSWafYGvjZbOK4zvfPXdHoNfILCGU6YjMo"
+        "versionLogicalId": "GetProductLambdaVersionE9MPuFU4lFWntpdyDsEkP4gK1PCBsSBJFfy9h0OtpE"
       },
       "updateProduct": {
-        "handler": "src/services/products.updateProduct",
+        "handler": "src/functions/products.updateProduct",
         "environment": {
           "PRODUCTS_TABLE_NAME": {
             "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"UpdateProductLambdaFunction\"][\"Properties\"][\"Environment\"][\"Variables\"][\"PRODUCTS_TABLE_NAME\"]"
@@ -1543,10 +1774,10 @@
         "timeout": 6,
         "runtime": "nodejs16.x",
         "vpc": {},
-        "versionLogicalId": "UpdateProductLambdaVersionifvNvjngkHRQX8OPIz8AS5BKda0XkQhOI5vjEn74"
+        "versionLogicalId": "UpdateProductLambdaVersionR0HVEOYP3YTWXHn81Ihyc9ojpQYZ7uVLVgEMFkNbM"
       },
       "deleteProduct": {
-        "handler": "src/services/products.deleteProduct",
+        "handler": "src/functions/products.deleteProduct",
         "environment": {
           "PRODUCTS_TABLE_NAME": {
             "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"DeleteProductLambdaFunction\"][\"Properties\"][\"Environment\"][\"Variables\"][\"PRODUCTS_TABLE_NAME\"]"
@@ -1580,7 +1811,44 @@
         "timeout": 6,
         "runtime": "nodejs16.x",
         "vpc": {},
-        "versionLogicalId": "DeleteProductLambdaVersionvv1Zphta5x1WWgwAouZ466Q7j1nvGqysTtZfA9JlE"
+        "versionLogicalId": "DeleteProductLambdaVersionuRHeB2LjXCqRNMZDRnm3qUFQToZ5bTODUARH9GumNk"
+      },
+      "createOrder": {
+        "handler": "src/functions/orders.createOrder",
+        "environment": {
+          "PRODUCTS_TABLE_NAME": {
+            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"CreateOrderLambdaFunction\"][\"Properties\"][\"Environment\"][\"Variables\"][\"PRODUCTS_TABLE_NAME\"]"
+          },
+          "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+        },
+        "iamRoleStatements": [
+          {
+            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"CreateOrderIamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][1]"
+          }
+        ],
+        "events": [
+          {
+            "httpApi": {
+              "path": "/orders",
+              "method": "post"
+            },
+            "resolvedMethod": "POST",
+            "resolvedPath": "/orders"
+          }
+        ],
+        "name": "abc-farms-api-dev-createOrder",
+        "package": {
+          "exclude": [
+            "node_modules/serverless-plugin-typescript"
+          ],
+          "include": [],
+          "patterns": []
+        },
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs16.x",
+        "vpc": {},
+        "versionLogicalId": "CreateOrderLambdaVersionKQLQugwHRl0L5B2RH9kKuld58CSb8IvjcxXs6jWg"
       }
     },
     "resources": {
@@ -1589,6 +1857,25 @@
           "Type": "AWS::DynamoDB::Table",
           "Properties": {
             "TableName": "products-dev",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              }
+            ]
+          }
+        },
+        "ordersTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "orders-dev",
             "BillingMode": "PAY_PER_REQUEST",
             "AttributeDefinitions": [
               {
@@ -1630,7 +1917,7 @@
     "artifact": "/Users/duro/Documents/work/aws/abc_farms_serverless/.build/.serverless/abc-farms-api.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/abc-farms-api/dev/1728249685712-2024-10-06T21:21:25.712Z",
+    "artifactDirectoryName": "serverless/abc-farms-api/dev/1728362900640-2024-10-08T04:48:20.640Z",
     "artifact": "abc-farms-api.zip"
   }
 }

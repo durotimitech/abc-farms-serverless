@@ -1,0 +1,87 @@
+# Products
+addProduct:
+  handler: src/functions/products.addProduct
+  environment:
+    PRODUCTS_TABLE_NAME: !Ref productsTable
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:PutItem
+      Resource: !GetAtt productsTable.Arn
+  events:
+    - httpApi:
+        path: /products
+        method: post
+getProducts:
+  handler: src/functions/products.getProducts
+  environment:
+    PRODUCTS_TABLE_NAME: !Ref productsTable
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:Scan
+      Resource: !GetAtt productsTable.Arn
+  events:
+    - httpApi:
+        path: /products
+        method: get
+getProduct:
+  handler: src/functions/products.getProduct
+  environment:
+    PRODUCTS_TABLE_NAME: !Ref productsTable
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:GetItem
+      Resource: !GetAtt productsTable.Arn
+  events:
+    - httpApi:
+        path: /products/{id}
+        method: get
+updateProduct:
+  handler: src/functions/products.updateProduct
+  environment:
+    PRODUCTS_TABLE_NAME: !Ref productsTable
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:UpdateItem
+      Resource: !GetAtt productsTable.Arn
+  events:
+    - httpApi:
+        path: /products/{id}
+        method: put
+deleteProduct:
+  handler: src/functions/products.deleteProduct
+  environment:
+    PRODUCTS_TABLE_NAME: !Ref productsTable
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:DeleteItem
+      Resource: !GetAtt productsTable.Arn
+  events:
+    - httpApi:
+        path: /products/{id}
+        method: delete
+
+# Orders
+createOrder:
+  handler: src/functions/orders.createOrder
+  environment:
+    PRODUCTS_TABLE_NAME: !Ref ordersTable
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:PutItem
+      Resource: !GetAtt ordersTable.Arn
+  events:
+    - httpApi:
+        path: /orders
+        method: post

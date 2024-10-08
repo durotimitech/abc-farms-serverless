@@ -8,92 +8,15 @@ provider:
   stage: ${opt:stage}
   region: us-east-1
 
-functions:
-  addProduct:
-    handler: src/services/products.addProduct
-    environment:
-      PRODUCTS_TABLE_NAME: !Ref productsTable
-      AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-    iamRoleStatements:
-      - Effect: "Allow"
-        Action:
-          - dynamodb:PutItem
-        Resource: !GetAtt productsTable.Arn
-    events:
-      - httpApi:
-          path: /products
-          method: post
-  getProducts:
-    handler: src/services/products.getProducts
-    environment:
-      PRODUCTS_TABLE_NAME: !Ref productsTable
-      AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-    iamRoleStatements:
-      - Effect: "Allow"
-        Action:
-          - dynamodb:Scan
-        Resource: !GetAtt productsTable.Arn
-    events:
-      - httpApi:
-          path: /products
-          method: get
-  getProduct:
-    handler: src/services/products.getProduct
-    environment:
-      PRODUCTS_TABLE_NAME: !Ref productsTable
-      AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-    iamRoleStatements:
-      - Effect: "Allow"
-        Action:
-          - dynamodb:Get Item
-        Resource: !GetAtt productsTable.Arn
-    events:
-      - httpApi:
-          path: /products/{id}
-          method: get
-  updateProduct:
-    handler: src/services/products.updateProduct
-    environment:
-      PRODUCTS_TABLE_NAME: !Ref productsTable
-      AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-    iamRoleStatements:
-      - Effect: "Allow"
-        Action:
-          - dynamodb:UpdateItem
-        Resource: !GetAtt productsTable.Arn
-    events:
-      - httpApi:
-          path: /products/{id}
-          method: put
-  deleteProduct:
-    handler: src/services/products.deleteProduct
-    environment:
-      PRODUCTS_TABLE_NAME: !Ref productsTable
-      AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-    iamRoleStatements:
-      - Effect: "Allow"
-        Action:
-          - dynamodb:DeleteItem
-        Resource: !GetAtt productsTable.Arn
-    events:
-      - httpApi:
-          path: /products/{id}
-          method: delete
-
+functions: ${file(configs/functions.yml)}
+  
 plugins:
   - serverless-plugin-typescript
   - serverless-iam-roles-per-function
 
 resources:
-  Resources:
-    productsTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: products-${self:provider.stage}
-        BillingMode: PAY_PER_REQUEST 
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
+  Resources: ${file(configs/resources.yml)}
+  Outputs:
+    EventBusName:
+      Value: !Ref EventBus
+    
