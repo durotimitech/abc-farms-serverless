@@ -1,9 +1,6 @@
 # Products
 addProduct:
   handler: src/functions/products.addProduct
-  environment:
-    PRODUCTS_TABLE_NAME: !Ref productsTable
-    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -15,9 +12,6 @@ addProduct:
         method: post
 getProducts:
   handler: src/functions/products.getProducts
-  environment:
-    PRODUCTS_TABLE_NAME: !Ref productsTable
-    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -29,9 +23,6 @@ getProducts:
         method: get
 getProduct:
   handler: src/functions/products.getProduct
-  environment:
-    PRODUCTS_TABLE_NAME: !Ref productsTable
-    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -43,9 +34,6 @@ getProduct:
         method: get
 updateProduct:
   handler: src/functions/products.updateProduct
-  environment:
-    PRODUCTS_TABLE_NAME: !Ref productsTable
-    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -57,9 +45,6 @@ updateProduct:
         method: put
 deleteProduct:
   handler: src/functions/products.deleteProduct
-  environment:
-    PRODUCTS_TABLE_NAME: !Ref productsTable
-    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -73,14 +58,19 @@ deleteProduct:
 # Orders
 createOrder:
   handler: src/functions/orders.createOrder
-  environment:
-    PRODUCTS_TABLE_NAME: !Ref ordersTable
-    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   iamRoleStatements:
     - Effect: "Allow"
       Action:
         - dynamodb:PutItem
       Resource: !GetAtt ordersTable.Arn
+    - Effect: "Allow"
+      Action:
+        - dynamodb:GetItem
+      Resource: !GetAtt productsTable.Arn
+    - Effect: "Allow"
+      Action:
+        - events:PutEvents
+      Resource: !GetAtt EventBus.Arn
   events:
     - httpApi:
         path: /orders

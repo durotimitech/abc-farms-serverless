@@ -7,6 +7,11 @@ provider:
   lambdaHashingVersion: 20201221
   stage: ${opt:stage}
   region: us-east-1
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    EVENT_BUS_NAME: !Ref EventBus
+    PRODUCTS_TABLE_NAME: !Ref productsTable
+    ORDERS_TABLE_NAME: !Ref ordersTable
 
 functions: ${file(configs/functions.yml)}
   

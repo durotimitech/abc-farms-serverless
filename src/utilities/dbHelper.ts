@@ -8,6 +8,3 @@ export const docClient = new DynamoDB.DocumentClient({
   },
 });
 
-export const DB_TABLE_NAMES = {
-  PRODUCTS: process.env.PRODUCTS_TABLE_NAME,
-};

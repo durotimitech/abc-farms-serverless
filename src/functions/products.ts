@@ -1,8 +1,9 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { addProductSchema } from "../utilities/validators/products";
 import { ResponseHandler, StatusCodes } from "../utilities/ResponseHandler";
-import { DB_TABLE_NAMES, docClient } from "../utilities/dbHelper";
+import {  docClient } from "../utilities/dbHelper";
 import ProductsService from "../services/Products";
+import { DB_TABLE_NAMES } from "../utilities/constants";
 
 export const addProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const validate = addProductSchema.validate(JSON.parse(event.body as string));
@@ -70,12 +71,12 @@ export const getProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewa
 
     return ResponseHandler({
       statusCode: StatusCodes.OK,
-      body: { message: product },
+      body: { data: product },
     });
   } catch (e) {
     return ResponseHandler({
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      body: { message: JSON.stringify(e) },
+      body: { data: JSON.stringify(e) },
     });
   }
 };

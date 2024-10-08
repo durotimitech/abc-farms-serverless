@@ -23,7 +23,42 @@ ordersTable:
         KeyType: HASH
 
 # Eventbridge
+# NB: 'EventBus' Can be any variable name of my choosing. It is not a strict terminology
 EventBus:
   Type: AWS::Events::EventBus
   Properties:
-    Name: ORDER_CREATED_EVENT_BUS
+    Name: ORDER_CREATED_EVENT_BUS-${self:provider.stage}
+
+# SQS Queue
+# NB: 'TargetSQSQueue' Can be any variable name of my choosing. It is not a strict terminology
+TargetSQSQueue:
+  Type: AWS::SQS::Queue
+  Properties:
+    QueueName: ORDER_CREATED_QUEUE-${self:provider.stage}
+
+TargetSQSRule:
+  Type: AWS::Events::Rule
+  Properties:
+    EventBusName: !GetAtt EventBus.Name
+    EventPattern:
+      source:
+        - "abc-farms-events"
+      detail-type:
+        - "order-created"
+    Targets:
+      - Arn: !GetAtt TargetSQSQueue.Arn
+        Id: order-created-bus-target-sqs-${self:provider.stage}
+
+TargetSQSPolicy:
+  Type: AWS::SQS::QueuePolicy
+  Properties:
+    Queues:
+      - !Ref TargetSQSQueue
+    PolicyDocument:
+      Statement:
+        - Effect: "Allow"
+          Action: 
+            - "SQS:SendMessage"
+          Resource: !GetAtt TargetSQSQueue.Arn
+          Principal:
+            Service: events.amazonaws.com
