@@ -82,3 +82,14 @@ sendOrderConfirmationEmailToBuyer:
         arn: !GetAtt TargetSQSQueue.Arn
         batchSize: 10
         functionResponseType: "ReportBatchItemFailures"
+updateProductQuantityAfterOrder:
+  handler: src/functions/orders.updateProductQuantityAfterOrder
+  events:
+    - stream:
+        type: dynamodb
+        arn: !GetAtt ordersTable.StreamArn
+        # filterPattern:
+        #   source:
+        #     - "abc-farms-events"
+        #   detail-type:
+        #     - "order-created"

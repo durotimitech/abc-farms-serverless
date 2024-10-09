@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, SQSEvent } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult, DynamoDBStreamEvent, SQSEvent } from "aws-lambda";
 import { createOrderSchema } from "../utilities/validators/orders";
 import { ErrorResponseHandler, ResponseHandler, StatusCodes } from "../utilities/ResponseHandler";
 import { ICreateOrder } from "../types/orders";
@@ -59,7 +59,7 @@ export const createOrder = async (event: APIGatewayProxyEvent): Promise<APIGatew
           `'createOrder': order created for product with id ${productId} and order id ${createOrder.data.id}`,
         );
 
-        logger.info(`'createOrder': sending event to EventBridge to notify order created`);
+        logger.info(`'createOrder': sending event to EventBridge to send order confirmation email to buyer`);
 
         const entry = {
           EventBusName: EVENT_BUS_NAME,
@@ -84,6 +84,7 @@ export const createOrder = async (event: APIGatewayProxyEvent): Promise<APIGatew
   }
 };
 
+// This function is triggered by the EventBridge event and SQS Queue when an order is created
 export const sendOrderConfirmationEmailToBuyer = async (event: SQSEvent) => {
   logger.info("'sendOrderConfirmationEmailToBuyer': event called");
 
@@ -94,6 +95,11 @@ export const sendOrderConfirmationEmailToBuyer = async (event: SQSEvent) => {
     for (const record of records) {
       try {
         const { id } = JSON.parse(record.body).detail;
+
+        // If there is any error, throw to DLQ in catch block
+        // if (typeof id == "string") {
+        //   throw new BadRequestError("Order ID must be a string");
+        // }
         logger.info(`'sendOrderConfirmationEmailToBuyer': email sent with order id ${id}`);
       } catch (e: any) {
         batchItemFailures.push({
@@ -104,4 +110,44 @@ export const sendOrderConfirmationEmailToBuyer = async (event: SQSEvent) => {
   }
 
   return { batchItemFailures };
+};
+
+export const updateProductQuantityAfterOrder = async (event: DynamoDBStreamEvent) => {
+  logger.info("'updateProductQuantityAfterOrder': event called");
+
+  try {
+    event.Records.forEach(async (record) => {
+      if (record.eventName === "INSERT") {
+        logger.info("'updateProductQuantityAfterOrder': INSERT operation called");
+
+        const { productId, qty } = record.dynamodb?.NewImage as { productId: { S: string }; qty: { N: string } };
+
+        logger.info(`'updateProductQuantityAfterOrder': product id ${productId.S} and qty ${qty.N}`);
+
+        const product = await ProductsService.getProduct(productId.S);
+
+        if (!product.success) {
+          throw new BadRequestError(product.errMessage as string);
+        }
+
+        const updatedQty = product.data.qty - parseInt(qty.N);
+
+        const updateProduct = await ProductsService.updateProduct({
+          id: productId.S,
+          name: product.data.name,
+          price: product.data.price,
+          qty: updatedQty,
+        });
+
+        if (!updateProduct.success) {
+          throw new BadRequestError(updateProduct.errMessage as string);
+        }
+      }
+    });
+
+    return;
+  } catch (e: any) {
+    logger.error(`'updateProductQuantityAfterOrder': ${e.message}`);
+    return;
+  }
 };

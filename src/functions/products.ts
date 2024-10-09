@@ -1,25 +1,26 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { addProductSchema } from "../utilities/validators/products";
-import { ResponseHandler, StatusCodes } from "../utilities/ResponseHandler";
-import {  docClient } from "../utilities/dbHelper";
+import { ErrorResponseHandler, ResponseHandler, StatusCodes } from "../utilities/ResponseHandler";
+import { docClient } from "../utilities/dbHelper";
 import ProductsService from "../services/Products";
 import { DB_TABLE_NAMES } from "../utilities/constants";
+import logger from "../utilities/logger";
+import { BadRequestError } from "../utilities/Errors/CustomErrors";
 
 export const addProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const validate = addProductSchema.validate(JSON.parse(event.body as string));
-
-  if (validate.error) {
-    return ResponseHandler({
-      statusCode: StatusCodes.BAD_REQUEST,
-      body: { message: validate.error.details[0].message },
-    });
-  }
-
-  const { name, price, qty } = validate.value;
-
-  const id = Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+  logger.info("'addProduct': event called");
 
   try {
+    const validate = addProductSchema.validate(JSON.parse(event.body as string));
+
+    if (validate.error) {
+      throw new BadRequestError(validate.error.details[0].message);
+    }
+
+    const { name, price, qty } = validate.value;
+
+    const id = Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+
     const params = {
       TableName: DB_TABLE_NAMES.PRODUCTS as string,
       Item: {
@@ -34,12 +35,12 @@ export const addProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewa
 
     return ResponseHandler({
       statusCode: StatusCodes.CREATED,
-      body: { message: "Product added successfully" },
+      body: { data: { message: "Product added successfully" } },
     });
   } catch (e) {
     return ResponseHandler({
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      body: { message: JSON.stringify(e) },
+      body: { data: { message: JSON.stringify(e) } },
     });
   }
 };
@@ -53,12 +54,12 @@ export const getProducts = async (event: APIGatewayProxyEvent): Promise<APIGatew
 
     return ResponseHandler({
       statusCode: StatusCodes.OK,
-      body: { message: products },
+      body: { data: { message: products } },
     });
   } catch (e) {
     return ResponseHandler({
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      body: { message: JSON.stringify(e) },
+      body: { data: { message: JSON.stringify(e) } },
     });
   }
 };
@@ -85,45 +86,33 @@ export const updateProduct = async (event: APIGatewayProxyEvent): Promise<APIGat
   const productId = event.pathParameters?.id;
   const validate = addProductSchema.validate(JSON.parse(event.body as string));
 
-  if (validate.error) {
-    return ResponseHandler({
-      statusCode: StatusCodes.BAD_REQUEST,
-      body: { message: validate.error.details[0].message },
-    });
-  }
-
-  const { name, price, qty } = validate.value;
-
   try {
-    const params = {
-      TableName: DB_TABLE_NAMES.PRODUCTS as string,
-      Key: {
-        id: productId,
-      },
-      UpdateExpression: "set #name = :name, #price = :price, #qty = :qty",
-      ExpressionAttributeNames: {
-        "#name": "name",
-        "#price": "price",
-        "#qty": "qty",
-      },
-      ExpressionAttributeValues: {
-        ":name": name,
-        ":price": price,
-        ":qty": qty,
-      },
-      ConditionExpression: "attribute_exists(id)",
-    };
-    await docClient.update(params).promise();
+    if (validate.error) {
+      return ResponseHandler({
+        statusCode: StatusCodes.BAD_REQUEST,
+        body: { data: { message: validate.error.details[0].message } },
+      });
+    }
+
+    const { name, price, qty } = validate.value;
+
+    const res = await ProductsService.updateProduct({
+      id: productId || "",
+      name,
+      price,
+      qty,
+    });
+
+    if (!res.success) {
+      throw new BadRequestError(res.errMessage as string);
+    }
 
     return ResponseHandler({
       statusCode: StatusCodes.CREATED,
-      body: { message: "Product edited successfully" },
+      body: { data: { message: "Product edited successfully" } },
     });
   } catch (e) {
-    return ResponseHandler({
-      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      body: { message: JSON.stringify(e) },
-    });
+    return ErrorResponseHandler(e);
   }
 };
 
@@ -142,12 +131,12 @@ export const deleteProduct = async (event: APIGatewayProxyEvent): Promise<APIGat
 
     return ResponseHandler({
       statusCode: StatusCodes.CREATED,
-      body: { message: "Product deleted successfully" },
+      body: { data: { message: "Product deleted successfully" } },
     });
   } catch (e) {
     return ResponseHandler({
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      body: { message: JSON.stringify(e) },
+      body: { data: { message: JSON.stringify(e) } },
     });
   }
 };
